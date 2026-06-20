@@ -1,0 +1,176 @@
+% ============================================================================
+% Sección 2: Marco Teórico
+% ============================================================================
+\section{Marco Teórico}
+
+\subsection{Fundamentos de búsqueda en grafos}
+
+Un problema de búsqueda se define formalmente como una tupla $(S, s_0, G, A, c)$ donde $S$ es el conjunto de estados, $s_0 \in S$ es el estado inicial, $G \subseteq S$ es el conjunto de estados meta, $A$ es el conjunto de acciones disponibles, y $c: A \rightarrow \mathbb{R}^+$ es la función de costo \cite{russell2021artificial}. El objetivo es encontrar una secuencia de acciones que transforme $s_0$ en algún estado $g \in G$ minimizando el costo total.
+
+\subsection{Algoritmos de búsqueda no informada}
+
+\subsubsection{Búsqueda en Amplitud (BFS)}
+
+BFS explora el espacio de estados nivel por nivel, expandiendo todos los nodos a profundidad $d$ antes de proceder a profundidad $d+1$. Emplea una cola FIFO como estructura de datos principal \cite{cormen2022introduction}.
+
+\begin{itemize}
+    \item \textbf{Completitud:} Sí, si el factor de ramificación $b$ es finito.
+    \item \textbf{Optimalidad:} Sí, cuando todos los costos de aristas son uniformes.
+    \item \textbf{Complejidad temporal:} $O(b^d)$
+    \item \textbf{Complejidad espacial:} $O(b^d)$
+\end{itemize}
+
+\subsubsection{Búsqueda en Profundidad (DFS)}
+
+DFS explora cada rama del árbol de búsqueda hasta su máxima profundidad antes de retroceder. Utiliza una pila (LIFO) o recursión como mecanismo de control \cite{cormen2022introduction}.
+
+\begin{itemize}
+    \item \textbf{Completitud:} No, en espacios infinitos sin detección de ciclos.
+    \item \textbf{Optimalidad:} No garantizada.
+    \item \textbf{Complejidad temporal:} $O(b^m)$ donde $m$ es la profundidad máxima.
+    \item \textbf{Complejidad espacial:} $O(bm)$
+\end{itemize}
+
+\subsubsection{Algoritmo de Dijkstra}
+
+El algoritmo de Dijkstra \cite{dijkstra1959note} generaliza BFS para grafos con costos no uniformes. Emplea una cola de prioridad ordenada por el costo acumulado $g(n)$ desde el origen.
+
+\begin{itemize}
+    \item \textbf{Completitud:} Sí, en grafos finitos con costos no negativos.
+    \item \textbf{Optimalidad:} Sí, siempre.
+    \item \textbf{Complejidad temporal:} $O((V + E) \log V)$ con cola de prioridad binaria.
+    \item \textbf{Complejidad espacial:} $O(V)$
+\end{itemize}
+
+\subsection{Algoritmo A*}
+
+\subsubsection{Definición formal}
+
+El algoritmo A* \cite{hart1968formal} es un algoritmo de búsqueda informada que extiende el algoritmo de Dijkstra incorporando una función heurística. Para cada nodo $n$, A* evalúa:
+
+\begin{equation}
+    f(n) = g(n) + h(n)
+    \label{eq:astar}
+\end{equation}
+
+donde:
+\begin{itemize}
+    \item $g(n)$: costo real del camino desde el nodo inicial hasta $n$.
+    \item $h(n)$: estimación heurística del costo desde $n$ hasta la meta.
+    \item $f(n)$: costo total estimado del camino óptimo a través de $n$.
+\end{itemize}
+
+\subsubsection{Pseudocódigo}
+
+El Algoritmo~\ref{alg:astar} presenta el pseudocódigo formal de A*.
+
+\begin{algorithm}[H]
+\caption{Algoritmo A*}
+\label{alg:astar}
+\begin{algorithmic}[1]
+\REQUIRE Problema de búsqueda $(s_0, G, \text{successors}, h)$
+\ENSURE Camino óptimo de $s_0$ a $g \in G$ o fallo
+\STATE $\text{open} \leftarrow$ cola de prioridad con $\{s_0\}$
+\STATE $g[s_0] \leftarrow 0$
+\STATE $\text{closed} \leftarrow \emptyset$
+\WHILE{$\text{open} \neq \emptyset$}
+    \STATE $n \leftarrow$ extraer nodo con menor $f(n)$ de open
+    \IF{$n \in G$}
+        \RETURN reconstruir\_camino($n$)
+    \ENDIF
+    \STATE $\text{closed} \leftarrow \text{closed} \cup \{n\}$
+    \FORALL{$(m, c) \in \text{successors}(n)$}
+        \IF{$m \in \text{closed}$}
+            \STATE \textbf{continuar}
+        \ENDIF
+        \STATE $g_{\text{tentativo}} \leftarrow g[n] + c$
+        \IF{$g_{\text{tentativo}} < g[m]$}
+            \STATE $g[m] \leftarrow g_{\text{tentativo}}$
+            \STATE $f[m] \leftarrow g[m] + h(m)$
+            \STATE insertar o actualizar $m$ en open
+        \ENDIF
+    \ENDFOR
+\ENDWHILE
+\RETURN fallo
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Propiedades formales}
+
+\textbf{Definición 1 (Heurística admisible).} Una heurística $h$ es admisible si para todo nodo $n$:
+\begin{equation}
+    0 \leq h(n) \leq h^*(n)
+    \label{eq:admissible}
+\end{equation}
+donde $h^*(n)$ es el costo real óptimo desde $n$ hasta la meta más cercana.
+
+\textbf{Definición 2 (Heurística consistente).} Una heurística $h$ es consistente (o monótona) si para todo nodo $n$ y todo sucesor $m$ generado por la acción $a$:
+\begin{equation}
+    h(n) \leq c(n, a, m) + h(m)
+    \label{eq:consistent}
+\end{equation}
+
+\textbf{Teorema 1 (Optimalidad de A*).} Si la heurística $h$ es admisible, A* con búsqueda en árbol encuentra la solución óptima. Si $h$ es consistente, A* con búsqueda en grafo encuentra la solución óptima \cite{hart1968formal}.
+
+\textbf{Teorema 2 (Completitud).} A* es completo en grafos finitos o en grafos infinitos donde existe al menos una solución con costo finito y el costo mínimo de las aristas es positivo \cite{pearl1984heuristics}.
+
+\textbf{Teorema 3 (Eficiencia óptima).} No existe otro algoritmo óptimo que, usando la misma heurística, garantice expandir menos nodos que A* (excluyendo empates en $f$) \cite{dechter1985generalized}.
+
+\subsubsection{Complejidad}
+
+\begin{itemize}
+    \item \textbf{Temporal:} $O(b^d)$ en el peor caso, donde $b$ es el factor de ramificación y $d$ la profundidad de la solución. Con buena heurística, se reduce significativamente.
+    \item \textbf{Espacial:} $O(b^d)$, ya que almacena todos los nodos generados.
+\end{itemize}
+
+El factor de ramificación efectivo $b^*$ permite evaluar la calidad de una heurística. Si A* genera $N$ nodos para encontrar una solución a profundidad $d$, entonces $b^*$ satisface:
+\begin{equation}
+    N + 1 = 1 + b^* + (b^*)^2 + \cdots + (b^*)^d
+    \label{eq:branching}
+\end{equation}
+
+\subsection{Funciones heurísticas}
+
+\subsubsection{Distancia Manhattan}
+
+Para grids con movimiento en 4 direcciones (arriba, abajo, izquierda, derecha):
+\begin{equation}
+    h_{\text{Manhattan}}(n) = |x_n - x_g| + |y_n - y_g|
+    \label{eq:manhattan}
+\end{equation}
+
+Es admisible para grids con costo uniforme y movimiento cardinal.
+
+\subsubsection{Distancia Euclidiana}
+
+Para grids con movimiento en 8 direcciones (incluye diagonales):
+\begin{equation}
+    h_{\text{Euclidiana}}(n) = \sqrt{(x_n - x_g)^2 + (y_n - y_g)^2}
+    \label{eq:euclidean}
+\end{equation}
+
+Es admisible para cualquier esquema de movimiento, ya que la línea recta siempre subestima la distancia real del camino.
+
+\subsection{Comparación teórica de algoritmos}
+
+La Tabla~\ref{tab:comparison} sintetiza la comparación teórica entre los algoritmos analizados.
+
+\begin{table}[H]
+\centering
+\caption{Comparación teórica de algoritmos de búsqueda}
+\label{tab:comparison}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Propiedad} & \textbf{BFS} & \textbf{DFS} & \textbf{Dijkstra} & \textbf{A*} \\
+\midrule
+Completo & Sí & No & Sí & Sí \\
+Óptimo & Sí$^1$ & No & Sí & Sí$^2$ \\
+Tiempo & $O(b^d)$ & $O(b^m)$ & $O((V\!+\!E)\log V)$ & $O(b^d)$ \\
+Espacio & $O(b^d)$ & $O(bm)$ & $O(V)$ & $O(b^d)$ \\
+Informado & No & No & No & Sí \\
+Estructura & Cola & Pila & Heap & Heap \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize $^1$Con costos uniformes. $^2$Con heurística admisible.}
+\end{tabular}
+\end{table}

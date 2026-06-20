@@ -1,0 +1,62 @@
+% ============================================================================
+% Sección 7: Conclusiones
+% ============================================================================
+\section{Conclusiones}
+
+\subsection{Conclusiones principales}
+
+Este trabajo presentó el diseño, implementación y validación experimental de \texttt{search-library}, un framework extensible para búsqueda heurística que implementa el algoritmo A* aplicado a grafos ponderados y matrices bidimensionales. A partir del análisis teórico y los resultados experimentales, se concluye:
+
+\begin{enumerate}
+    \item \textbf{Optimalidad garantizada:} A* encuentra consistentemente el camino de costo mínimo cuando se emplea una heurística admisible. En todos los experimentos realizados, el costo de la solución de A* coincidió con el de Dijkstra (que es provablemente óptimo), validando la correctitud de la implementación.
+    
+    \item \textbf{Eficiencia superior:} La incorporación de información heurística reduce significativamente el espacio de búsqueda explorado. La reducción oscila entre 28\% en grafos pequeños (8 nodos) y 74\% en grids grandes ($50 \times 50$), demostrando que la ventaja de A* se amplifica con la escala del problema.
+    
+    \item \textbf{Importancia de la heurística:} La elección de la función heurística impacta directamente en la eficiencia del algoritmo. La heurística Manhattan resultó un 18\% más eficiente que la Euclidiana en grids con movimiento cardinal, al proporcionar una estimación más ajustada al costo real.
+    
+    \item \textbf{Arquitectura extensible:} El uso de patrones de diseño (Strategy, Adapter, Template Method) y tipos genéricos permite que la librería se adapte a diversos dominios sin modificación del código base. Nuevas heurísticas, nuevas representaciones de estado y nuevos problemas de búsqueda pueden integrarse implementando las interfaces definidas.
+    
+    \item \textbf{Calidad de software:} La combinación de tipado estático (\texttt{mypy} strict), análisis con \texttt{ruff}, cobertura de pruebas $\geq 90\%$ y ausencia de dependencias externas produce un artefacto de software confiable y mantenible.
+\end{enumerate}
+
+\subsection{Relación con la Inteligencia Artificial}
+
+A* ejemplifica un principio fundamental de la IA: la combinación de conocimiento del dominio (heurística) con búsqueda sistemática produce resultados superiores a la fuerza bruta. Este principio se extiende a:
+
+\begin{itemize}
+    \item \textbf{Planificación automatizada:} Los planificadores basados en heurísticas (e.g., FF, Fast Downward) emplean variantes de A* para encontrar planes óptimos en espacios de estados exponenciales \cite{helmert2006fast}.
+    
+    \item \textbf{Aprendizaje por refuerzo:} El concepto de función de valor $V(s)$ en RL es análogo a la función $h(n)$ de A*, estimando la recompensa futura desde un estado.
+    
+    \item \textbf{Búsqueda neural:} Trabajos recientes exploran el uso de redes neuronales para aprender heurísticas admisibles automáticamente, eliminando la necesidad de diseño manual \cite{arfaee2011learning}.
+\end{itemize}
+
+\subsection{Limitaciones del estudio}
+
+\begin{itemize}
+    \item Los experimentos se realizaron en escenarios estáticos; no se evaluó el rendimiento en entornos dinámicos.
+    \item Las comparaciones de tiempo de ejecución están sujetas a las características del intérprete de Python y no reflejan necesariamente el rendimiento en implementaciones de bajo nivel.
+    \item La escalabilidad se evaluó hasta grids de $50 \times 50$; dominios con millones de nodos requerirían optimizaciones adicionales.
+\end{itemize}
+
+\subsection{Trabajo futuro}
+
+Se identifican las siguientes líneas de desarrollo futuro:
+
+\begin{enumerate}
+    \item \textbf{Algoritmos adicionales:} Incorporar IDA*, D* Lite y Bidirectional A* para ampliar el repertorio de estrategias de búsqueda.
+    
+    \item \textbf{Heurísticas avanzadas:} Implementar heurísticas basadas en landmarks (ALT algorithm) y pattern databases para mejorar la eficiencia en grafos de gran escala.
+    
+    \item \textbf{Entornos dinámicos:} Extender la librería para soportar replanificación en tiempo real ante cambios en la topología o costos del grafo.
+    
+    \item \textbf{Paralelización:} Explorar variantes paralelas de A* (HDA*, PRA*) para aprovechar arquitecturas multi-core.
+    
+    \item \textbf{Visualización:} Desarrollar herramientas de visualización interactiva que permitan observar la progresión del algoritmo paso a paso.
+    
+    \item \textbf{Benchmarks estandarizados:} Evaluar contra los mapas de referencia del repositorio Moving AI Lab \cite{sturtevant2012benchmarks} para comparación directa con otras implementaciones.
+\end{enumerate}
+
+\subsection{Reflexión final}
+
+El algoritmo A*, a más de cinco décadas de su publicación, permanece como uno de los pilares de la inteligencia artificial aplicada. Su elegancia radica en la simplicidad del principio que lo sustenta: integrar conocimiento del dominio en el proceso de búsqueda de manera formalmente correcta. La implementación presentada en \texttt{search-library} demuestra que este principio puede materializarse en software moderno, extensible y verificable, sentando las bases para aplicaciones en robótica, videojuegos, navegación y más allá.

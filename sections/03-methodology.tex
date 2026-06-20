@@ -1,0 +1,95 @@
+% ============================================================================
+% Sección 3: Metodología
+% ============================================================================
+\section{Metodología}
+
+\subsection{Enfoque de diseño}
+
+El desarrollo de \texttt{search-library} siguió una metodología basada en principios de ingeniería de software, combinando diseño orientado a objetos con prácticas de desarrollo ágil. Se aplicaron los principios SOLID para garantizar extensibilidad y mantenibilidad del código \cite{martin2017clean}.
+
+\subsubsection{Patrones de diseño aplicados}
+
+\begin{itemize}
+    \item \textbf{Strategy Pattern:} Permite intercambiar funciones heurísticas en tiempo de ejecución sin modificar el algoritmo base. Cada heurística implementa una interfaz común \texttt{Heuristic[T]}.
+    
+    \item \textbf{Adapter Pattern:} Los adaptadores \texttt{GraphSearchProblem} y \texttt{GridSearchProblem} transforman las estructuras de datos concretas (grafos, grids) en instancias compatibles con la interfaz abstracta \texttt{SearchProblem[T]}.
+    
+    \item \textbf{Template Method:} La clase abstracta \texttt{SearchProblem} define el esqueleto del problema de búsqueda, delegando la implementación específica a las subclases.
+\end{itemize}
+
+\subsection{Arquitectura del sistema}
+
+La arquitectura de \texttt{search-library} se organiza en módulos cohesivos con responsabilidades bien definidas:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    module/.style={rectangle, draw=blue!60, fill=blue!5, thick, minimum width=2.8cm, minimum height=0.8cm, font=\small},
+    arrow/.style={-{Stealth[length=3mm]}, thick},
+    node distance=1.2cm and 1.5cm
+]
+    % Core module
+    \node[module] (core) {\texttt{core}};
+    \node[module, right=of core] (algorithms) {\texttt{algorithms}};
+    \node[module, below=of core] (graph) {\texttt{graph}};
+    \node[module, right=of graph] (grid) {\texttt{grid}};
+    \node[module, below left=1cm and -0.5cm of graph] (heuristics) {\texttt{heuristics}};
+    \node[module, below right=1cm and -0.5cm of grid] (exceptions) {\texttt{exceptions}};
+    
+    % Arrows
+    \draw[arrow] (algorithms) -- (core);
+    \draw[arrow] (graph) -- (core);
+    \draw[arrow] (grid) -- (core);
+    \draw[arrow] (grid) -- (heuristics);
+    \draw[arrow] (graph) -- (heuristics);
+    
+\end{tikzpicture}
+\caption{Arquitectura modular de \texttt{search-library}}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Metodología experimental}
+
+Para la validación del algoritmo se diseñó un protocolo experimental con los siguientes componentes:
+
+\subsubsection{Escenarios de prueba}
+
+\begin{enumerate}
+    \item \textbf{Grafos ponderados:} Grafos dirigidos y no dirigidos con pesos variables, simulando redes de transporte con 10 a 100 nodos.
+    
+    \item \textbf{Grids bidimensionales:} Matrices de $10 \times 10$ hasta $50 \times 50$ con densidades de obstáculos del 20\% al 40\%, simulando entornos de navegación.
+    
+    \item \textbf{Configuraciones de heurística:} Evaluación comparativa entre heurística Manhattan (4 direcciones), Euclidiana (8 direcciones), y heurística nula ($h = 0$, equivalente a Dijkstra).
+\end{enumerate}
+
+\subsubsection{Métricas de evaluación}
+
+Las métricas empleadas para la comparación son:
+
+\begin{itemize}
+    \item \textbf{Nodos explorados:} Número de estados expandidos durante la búsqueda.
+    \item \textbf{Costo del camino:} Costo total de la solución encontrada.
+    \item \textbf{Longitud del camino:} Número de pasos (aristas) en la solución.
+    \item \textbf{Optimalidad:} Verificación de que la solución encontrada sea óptima.
+\end{itemize}
+
+\subsubsection{Herramientas y entorno}
+
+\begin{itemize}
+    \item \textbf{Lenguaje:} Python 3.11+
+    \item \textbf{Framework de testing:} pytest con cobertura $\geq 90\%$
+    \item \textbf{Análisis estático:} mypy (strict mode), ruff
+    \item \textbf{Gestión de dependencias:} uv con hatchling como build system
+    \item \textbf{Sin dependencias externas:} La librería no requiere paquetes de terceros
+\end{itemize}
+
+\subsection{Validación de correctitud}
+
+La correctitud del algoritmo se valida mediante:
+
+\begin{enumerate}
+    \item \textbf{Pruebas unitarias:} Verificación de cada componente individual (nodos, grafos, grids, heurísticas).
+    \item \textbf{Pruebas de integración:} Validación del flujo completo de búsqueda en escenarios conocidos.
+    \item \textbf{Verificación de optimalidad:} Comparación de los resultados de A* contra soluciones calculadas por fuerza bruta en grafos pequeños.
+    \item \textbf{Tipado estático:} Uso de \texttt{mypy} en modo estricto para garantizar corrección de tipos en tiempo de compilación.
+\end{enumerate}

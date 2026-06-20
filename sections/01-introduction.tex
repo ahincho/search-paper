@@ -1,0 +1,30 @@
+% ============================================================================
+% Sección 1: Introducción
+% ============================================================================
+\section{Introducción}
+
+La búsqueda de caminos óptimos en espacios discretos constituye un problema fundamental en ciencias de la computación e inteligencia artificial. Desde la planificación de rutas en sistemas de navegación hasta la toma de decisiones en agentes autónomos, los algoritmos de búsqueda representan la base sobre la cual se construyen sistemas inteligentes capaces de resolver problemas complejos de manera eficiente \cite{russell2021artificial}.
+
+El algoritmo A*, propuesto por Hart, Nilsson y Raphael en 1968 \cite{hart1968formal}, revolucionó el campo de la búsqueda informada al combinar la completitud de la búsqueda por amplitud con la eficiencia de las funciones heurísticas. Su función de evaluación $f(n) = g(n) + h(n)$ integra el costo real acumulado desde el origen con una estimación del costo restante hacia la meta, permitiendo guiar la exploración hacia las regiones más prometedoras del espacio de búsqueda.
+
+A pesar de su antigüedad, A* continúa siendo relevante en aplicaciones modernas. En la industria de videojuegos, es el algoritmo predominante para el pathfinding de personajes no jugables (NPCs) \cite{millington2019ai}. En robótica, se emplea para la planificación de movimiento en entornos con obstáculos \cite{lavalle2006planning}. En sistemas de navegación GPS, variantes de A* procesan millones de consultas de rutas diariamente \cite{bast2016route}.
+
+\subsection{Motivación}
+
+La necesidad de implementaciones eficientes y extensibles de algoritmos de búsqueda motivó el desarrollo de \texttt{search-library}, un framework en Python que encapsula el algoritmo A* mediante una arquitectura orientada a objetos. La librería emplea patrones de diseño reconocidos --- específicamente Strategy para heurísticas intercambiables y Adapter para la integración de diferentes estructuras de datos --- facilitando su aplicación en múltiples dominios.
+
+\subsection{Objetivos}
+
+Los objetivos de este trabajo son:
+
+\begin{enumerate}
+    \item Presentar la fundamentación teórica del algoritmo A* y sus propiedades de optimalidad y completitud.
+    \item Describir el diseño arquitectónico e implementación de \texttt{search-library} como framework extensible.
+    \item Realizar un análisis comparativo formal entre A*, BFS, DFS y Dijkstra en términos de complejidad y rendimiento.
+    \item Validar experimentalmente la eficiencia del algoritmo en escenarios de grafos ponderados y grids bidimensionales.
+    \item Discutir las implicaciones prácticas y aplicaciones en dominios de inteligencia artificial.
+\end{enumerate}
+
+\subsection{Estructura del artículo}
+
+El resto de este artículo se organiza de la siguiente manera: la Sección~II presenta el marco teórico y fundamentos de los algoritmos de búsqueda. La Sección~III describe la metodología de diseño e implementación. La Sección~IV detalla los aspectos técnicos de la implementación. La Sección~V presenta los resultados experimentales. La Sección~VI discute los hallazgos y sus implicaciones. Finalmente, la Sección~VII expone las conclusiones y trabajo futuro.

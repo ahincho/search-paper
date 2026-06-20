@@ -1,0 +1,94 @@
+% ============================================================================
+% A* Search Algorithm: Implementación y Análisis en Grafos y Matrices
+% Academic Paper - IEEE Conference Format
+% ============================================================================
+\documentclass[conference]{IEEEtran}
+
+% ---- Paquetes ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{float}
+
+% ---- Configuración de TikZ ----
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric}
+
+% ---- Configuración de listings para Python ----
+\lstset{
+    language=Python,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!5},
+    frame=single,
+    rulecolor=\color{gray!30},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false,
+    captionpos=b
+}
+
+% ---- Configuración de hyperref ----
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!50!black,
+    urlcolor=blue!80!black
+}
+
+% ---- Información del documento ----
+\title{Algoritmo de Búsqueda A*: Implementación y Análisis Comparativo en Grafos y Matrices}
+
+\author{
+    \IEEEauthorblockN{Angel Hincho}
+    \IEEEauthorblockA{
+        \textit{Escuela Profesional de Ingeniería de Sistemas} \\
+        \textit{Universidad Nacional de San Agustín de Arequipa} \\
+        Arequipa, Perú \\
+        ahincho@unsa.edu.pe
+    }
+}
+
+\begin{document}
+
+% ---- Abstract ----
+\begin{abstract}
+El algoritmo A* constituye uno de los métodos de búsqueda heurística más ampliamente utilizados en inteligencia artificial para la resolución de problemas de búsqueda de caminos óptimos. Este trabajo presenta el diseño, implementación y validación de una librería extensible en Python denominada \texttt{search-library}, que implementa el algoritmo A* aplicado tanto a grafos ponderados como a matrices bidimensionales (grids). Se realiza un análisis comparativo exhaustivo con los algoritmos BFS, DFS y Dijkstra, evaluando complejidad temporal, complejidad espacial y número de nodos explorados. Los resultados experimentales demuestran que A* reduce significativamente el espacio de búsqueda respecto a Dijkstra (hasta un 62\% menos de nodos explorados) mientras mantiene la garantía de optimalidad cuando se emplea una heurística admisible. La arquitectura basada en patrones de diseño Strategy y Adapter permite la extensibilidad del framework para diversos dominios de aplicación, incluyendo videojuegos, robótica y sistemas de navegación.
+\end{abstract}
+
+\begin{IEEEkeywords}
+A* search, búsqueda heurística, grafos, pathfinding, inteligencia artificial, algoritmos de búsqueda, heurística admisible
+\end{IEEEkeywords}
+
+% ---- Secciones ----
+\input{sections/01-introduction}
+\input{sections/02-theory}
+\input{sections/03-methodology}
+\input{sections/04-implementation}
+\input{sections/05-results}
+\input{sections/06-discussion}
+\input{sections/07-conclusions}
+
+% ---- Referencias ----
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

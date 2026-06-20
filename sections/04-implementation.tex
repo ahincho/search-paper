@@ -1,0 +1,276 @@
+% ============================================================================
+% Sección 4: Implementación
+% ============================================================================
+\section{Implementación}
+
+\subsection{Estructura del proyecto}
+
+La librería \texttt{search-library} se organiza siguiendo las convenciones estándar de paquetes Python con el layout \texttt{src/}:
+
+\begin{lstlisting}[language={}, caption={Estructura del proyecto}, label={lst:structure}]
+search-library/
+  src/search_library/
+    algorithms/
+      astar.py
+    core/
+      nodes.py
+      problem.py
+      result.py
+      state.py
+    graph/
+      edges.py
+      graph.py
+    grid/
+      grid.py
+      grid_search.py
+    heuristics/
+      base.py
+      euclidean.py
+      manhattan.py
+    exceptions/
+      exceptions.py
+    utils/
+      helpers.py
+\end{lstlisting}
+
+\subsection{Módulo Core: Abstracciones fundamentales}
+
+\subsubsection{Interfaz SearchProblem}
+
+La clase abstracta \texttt{SearchProblem[T]} define el contrato que todo problema de búsqueda debe implementar, parametrizada por el tipo genérico $T$ del estado:
+
+\begin{lstlisting}[caption={Interfaz abstracta del problema de búsqueda}, label={lst:problem}]
+class SearchProblem(ABC, Generic[T]):
+    @abstractmethod
+    def initial_state(self) -> T: ...
+
+    @abstractmethod
+    def is_goal(self, state: T) -> bool: ...
+
+    @abstractmethod
+    def successors(self, state: T) 
+        -> list[tuple[T, float]]: ...
+
+    def heuristic(self, state: T) -> float:
+        return 0.0  # Dijkstra por defecto
+\end{lstlisting}
+
+Este diseño permite que el algoritmo A* opere sobre cualquier dominio sin conocer la representación interna del estado.
+
+\subsubsection{Nodo de búsqueda}
+
+El \texttt{Node[T]} encapsula la información necesaria para el algoritmo, incluyendo la reconstrucción del camino:
+
+\begin{lstlisting}[caption={Estructura del nodo de búsqueda}, label={lst:node}]
+@dataclass(order=False)
+class Node(Generic[T]):
+    state: T
+    parent: Node[T] | None = None
+    g_cost: float = 0.0
+    h_cost: float = 0.0
+    f_cost: float = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.f_cost = self.g_cost + self.h_cost
+
+    def reconstruct_path(self) -> list[T]:
+        path: list[T] = []
+        current: Node[T] | None = self
+        while current is not None:
+            path.append(current.state)
+            current = current.parent
+        path.reverse()
+        return path
+\end{lstlisting}
+
+\subsubsection{Resultado de búsqueda}
+
+El resultado es un \texttt{dataclass} inmutable (\texttt{frozen=True}) que contiene la solución completa:
+
+\begin{lstlisting}[caption={Contenedor de resultados}, label={lst:result}]
+@dataclass(frozen=True)
+class SearchResult(Generic[T]):
+    path: list[T] = field(default_factory=list)
+    total_cost: float = 0.0
+    nodes_explored: int = 0
+    success: bool = False
+    explored_states: frozenset[T] = field(
+        default_factory=frozenset
+    )
+\end{lstlisting}
+
+\subsection{Algoritmo A*: Implementación central}
+
+La implementación de A* emplea un heap binario (\texttt{heapq}) como cola de prioridad y un conjunto cerrado para evitar reexpansiones:
+
+\begin{lstlisting}[caption={Implementación del algoritmo A*}, label={lst:astar}]
+class AStarSearch(Generic[T]):
+    def __init__(self, problem: SearchProblem[T]):
+        self._problem = problem
+
+    def search(self) -> SearchResult[T]:
+        initial = self._problem.initial_state()
+        h_cost = self._problem.heuristic(initial)
+        start_node = Node(
+            state=initial, g_cost=0.0, h_cost=h_cost
+        )
+        # (f_cost, counter, node) - counter rompe
+        # empates con orden FIFO
+        counter = 0
+        open_list = []
+        heapq.heappush(
+            open_list, 
+            (start_node.f_cost, counter, start_node)
+        )
+        g_scores = {initial: 0.0}
+        closed_set: set[T] = set()
+
+        while open_list:
+            _, _, current = heapq.heappop(open_list)
+            if current.state in closed_set:
+                continue
+            closed_set.add(current.state)
+            if self._problem.is_goal(current.state):
+                path = current.reconstruct_path()
+                return SearchResult(
+                    path=path,
+                    total_cost=current.g_cost,
+                    nodes_explored=len(closed_set),
+                    success=True
+                )
+            for succ, cost in self._problem.successors(
+                current.state
+            ):
+                if succ in closed_set:
+                    continue
+                tent_g = current.g_cost + cost
+                if tent_g < g_scores.get(
+                    succ, float("inf")
+                ):
+                    g_scores[succ] = tent_g
+                    h = self._problem.heuristic(succ)
+                    node = Node(
+                        state=succ, parent=current,
+                        g_cost=tent_g, h_cost=h
+                    )
+                    counter += 1
+                    heapq.heappush(
+                        open_list,
+                        (node.f_cost, counter, node)
+                    )
+        return SearchResult(success=False)
+\end{lstlisting}
+
+\subsection{Módulo Graph}
+
+El módulo de grafos proporciona una estructura de datos para grafos ponderados, tanto dirigidos como no dirigidos:
+
+\begin{lstlisting}[caption={Grafo ponderado con adaptador a SearchProblem}, label={lst:graph}]
+class Graph(Generic[T]):
+    def __init__(self, directed: bool = True):
+        self.directed = directed
+        self._adjacency: dict[T, list[tuple[T, float]]] = {}
+
+    def add_edge(self, source, target, weight=1.0):
+        self._adjacency[source].append((target, weight))
+        if not self.directed:
+            self._adjacency[target].append(
+                (source, weight)
+            )
+
+    def to_search_problem(self, start, goal, heuristic):
+        return GraphSearchProblem(
+            self, start, goal, heuristic
+        )
+\end{lstlisting}
+
+\subsection{Módulo Grid}
+
+El módulo de grids implementa un tablero 2D con soporte para obstáculos, costos variables y movimiento configurable:
+
+\begin{lstlisting}[caption={Grid 2D con obstáculos y costos variables}, label={lst:grid}]
+class Grid:
+    def __init__(self, rows, cols, *,
+                 allow_diagonal=False,
+                 default_cost=1.0):
+        self.rows = rows
+        self.cols = cols
+        self.allow_diagonal = allow_diagonal
+        self._obstacles: set[Position] = set()
+        self._costs: dict[Position, float] = {}
+
+    @classmethod
+    def from_matrix(cls, matrix, *,
+                    obstacle_value=1,
+                    allow_diagonal=False):
+        """Crea grid desde matriz 2D."""
+        ...
+
+    def get_neighbors(self, position):
+        """Retorna vecinos transitables y costos."""
+        directions = (EIGHT_DIRECTIONS 
+            if self.allow_diagonal 
+            else FOUR_DIRECTIONS)
+        ...
+\end{lstlisting}
+
+\subsection{Módulo Heuristics}
+
+Las heurísticas siguen el patrón Strategy, permitiendo su intercambio transparente:
+
+\begin{lstlisting}[caption={Heurísticas: Manhattan y Euclidiana}, label={lst:heuristics}]
+class Heuristic(ABC, Generic[T]):
+    @abstractmethod
+    def estimate(self, state: T, goal: T) -> float:
+        """Nunca sobreestima el costo real."""
+
+class ManhattanHeuristic(Heuristic[tuple[int,int]]):
+    def estimate(self, state, goal) -> float:
+        return float(
+            abs(state[0]-goal[0]) + 
+            abs(state[1]-goal[1])
+        )
+
+class EuclideanHeuristic(Heuristic[tuple[int,int]]):
+    def estimate(self, state, goal) -> float:
+        dx = state[0] - goal[0]
+        dy = state[1] - goal[1]
+        return math.sqrt(dx*dx + dy*dy)
+\end{lstlisting}
+
+\subsection{Diagrama de flujo del algoritmo}
+
+La Figura~\ref{fig:flowchart} ilustra el flujo de ejecución del algoritmo A* implementado.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1cm,
+    startstop/.style={rectangle, rounded corners, draw=black, fill=red!10, text width=2.5cm, text centered, minimum height=0.7cm, font=\scriptsize},
+    process/.style={rectangle, draw=black, fill=blue!10, text width=3cm, text centered, minimum height=0.7cm, font=\scriptsize},
+    decision/.style={diamond, draw=black, fill=green!10, text width=1.8cm, text centered, minimum height=0.5cm, aspect=2, font=\scriptsize},
+    arrow/.style={-{Stealth[length=2mm]}, thick}
+]
+    \node[startstop] (start) {Inicio};
+    \node[process, below=of start] (init) {Inicializar open con $s_0$};
+    \node[decision, below=of init] (empty) {open vacío?};
+    \node[startstop, right=2.5cm of empty] (fail) {Fallo};
+    \node[process, below=of empty] (pop) {Extraer $n$ con menor $f(n)$};
+    \node[decision, below=of pop] (goal) {$n \in G$?};
+    \node[startstop, right=2.5cm of goal] (success) {Retornar camino};
+    \node[process, below=of goal] (expand) {Expandir sucesores};
+    \node[process, below=of expand] (update) {Actualizar $g$, $f$ en open};
+    
+    \draw[arrow] (start) -- (init);
+    \draw[arrow] (init) -- (empty);
+    \draw[arrow] (empty) -- node[above] {Sí} (fail);
+    \draw[arrow] (empty) -- node[right] {No} (pop);
+    \draw[arrow] (pop) -- (goal);
+    \draw[arrow] (goal) -- node[above] {Sí} (success);
+    \draw[arrow] (goal) -- node[right] {No} (expand);
+    \draw[arrow] (expand) -- (update);
+    \draw[arrow] (update.west) -- ++(-1.5,0) |- (empty.west);
+\end{tikzpicture}
+\caption{Diagrama de flujo del algoritmo A*}
+\label{fig:flowchart}
+\end{figure}

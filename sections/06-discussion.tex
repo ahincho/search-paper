@@ -1,0 +1,93 @@
+% ============================================================================
+% Sección 6: Discusión
+% ============================================================================
+\section{Discusión}
+
+\subsection{Análisis de resultados}
+
+Los resultados experimentales validan las propiedades teóricas del algoritmo A* y demuestran la efectividad de la implementación en \texttt{search-library}. La reducción en el número de nodos explorados --- entre 28\% y 74\% respecto a Dijkstra --- confirma que la incorporación de información heurística guía eficientemente la búsqueda hacia la solución sin sacrificar optimalidad.
+
+\subsubsection{Eficiencia de la heurística}
+
+La superioridad de la heurística Manhattan sobre la Euclidiana en grids con movimiento cardinal se explica por su mayor cercanía al costo real. Al considerar solo movimientos ortogonales, la distancia Manhattan coincide exactamente con el costo del camino óptimo en grids sin obstáculos, lo que la convierte en una heurística más informada para este dominio específico. Este resultado es consistente con la teoría: una heurística más informada (mayor valor sin dejar de ser admisible) produce menor número de expansiones \cite{pearl1984heuristics}.
+
+\subsubsection{Trade-off entre información y cómputo}
+
+A* presenta un compromiso inherente entre la calidad de la heurística y el costo computacional de evaluarla. En nuestros experimentos, ambas heurísticas (Manhattan y Euclidiana) tienen costo de evaluación $O(1)$, por lo que la diferencia en nodos explorados se traduce directamente en mejora de rendimiento. En dominios donde la heurística requiere cálculos costosos, este balance debe evaluarse cuidadosamente.
+
+\subsection{Ventajas de la arquitectura implementada}
+
+\subsubsection{Extensibilidad}
+
+El uso del patrón Strategy para heurísticas permite agregar nuevas funciones de estimación sin modificar el algoritmo base. Un desarrollador puede implementar la interfaz \texttt{Heuristic[T]} para adaptar A* a dominios específicos --- por ejemplo, heurísticas basadas en landmarks para grafos de gran escala \cite{goldberg2005computing}.
+
+\subsubsection{Genericidad}
+
+El sistema de tipos genéricos (\texttt{Generic[T]}) permite que la misma implementación de A* opere sobre:
+\begin{itemize}
+    \item Grafos con nodos de tipo \texttt{str} (ciudades).
+    \item Grids con posiciones \texttt{tuple[int, int]}.
+    \item Cualquier tipo hashable definido por el usuario.
+\end{itemize}
+
+\subsubsection{Desacoplamiento}
+
+El patrón Adapter desacopla la representación del dominio de la lógica del algoritmo. Los adaptadores \texttt{GraphSearchProblem} y \texttt{GridSearchProblem} actúan como puentes entre las estructuras de datos concretas y la interfaz abstracta que consume A*.
+
+\subsection{Aplicaciones en Inteligencia Artificial}
+
+\subsubsection{Videojuegos}
+
+En la industria de videojuegos, A* es el estándar para pathfinding de NPCs \cite{millington2019ai}. La implementación de grids con obstáculos y movimiento configurable (4 u 8 direcciones) se mapea directamente a los mapas de navegación (navmeshes) usados en motores como Unity o Unreal Engine.
+
+\subsubsection{Robótica}
+
+En robótica móvil, A* se aplica para la planificación de trayectorias en mapas de ocupación (occupancy grids) \cite{lavalle2006planning}. La clase \texttt{Grid} con costos variables puede representar terrenos con diferente dificultad de traversal.
+
+\subsubsection{Navegación GPS}
+
+Los sistemas de navegación modernos emplean variantes de A* (como ALT: A* with Landmarks and Triangle Inequality) para calcular rutas en grafos de millones de nodos \cite{bast2016route}. La arquitectura extensible de \texttt{search-library} permite incorporar estas optimizaciones mediante nuevas heurísticas.
+
+\subsubsection{Grafos de conocimiento}
+
+En IA simbólica, A* se utiliza para la búsqueda en grafos de conocimiento, donde los nodos representan conceptos y las aristas relaciones semánticas. La parametrización genérica del tipo de estado facilita esta aplicación.
+
+\subsection{Limitaciones}
+
+\subsubsection{Consumo de memoria}
+
+La principal limitación de A* es su complejidad espacial $O(b^d)$, que requiere almacenar todos los nodos generados en memoria. Para espacios de búsqueda muy grandes, esto puede ser prohibitivo. Variantes como IDA* (Iterative Deepening A*) \cite{korf1985depth} y SMA* (Simplified Memory-bounded A*) \cite{russell1992efficient} abordan este problema sacrificando tiempo por espacio.
+
+\subsubsection{Dependencia de la heurística}
+
+La eficiencia de A* depende críticamente de la calidad de la función heurística. Una heurística trivial ($h = 0$) degenera en Dijkstra, mientras que una heurística no admisible puede producir soluciones subóptimas. El diseño de heurísticas efectivas requiere conocimiento del dominio.
+
+\subsubsection{Grafos dinámicos}
+
+La implementación actual asume un entorno estático. En escenarios donde los costos o la topología cambian durante la búsqueda (e.g., tráfico en tiempo real), se requieren variantes como D* Lite \cite{koenig2002d} o Lifelong Planning A* \cite{koenig2004lifelong}.
+
+\subsubsection{Escalabilidad en grafos masivos}
+
+Para grafos con millones de nodos (e.g., redes viales a nivel nacional), A* básico resulta insuficiente. Técnicas de preprocesamiento como Contraction Hierarchies \cite{geisberger2008contraction} o la indexación por landmarks son necesarias para lograr tiempos de consulta aceptables.
+
+\subsection{Comparación con trabajos relacionados}
+
+La Tabla~\ref{tab:related} compara \texttt{search-library} con otras implementaciones disponibles.
+
+\begin{table}[H]
+\centering
+\caption{Comparación con implementaciones existentes}
+\label{tab:related}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Característica} & \textbf{Ours} & \textbf{NetworkX} & \textbf{pathfinding} \\
+\midrule
+Genérica (tipos) & Sí & No & No \\
+Grafos + Grids & Sí & Grafos & Grids \\
+Tipado estático & Sí & Parcial & No \\
+Sin dependencias & Sí & NumPy/SciPy & No \\
+Heurísticas plug. & Sí & No & Limitado \\
+\bottomrule
+\end{tabular}
+\end{table}
