@@ -17,8 +17,6 @@ on:
       - ".github/workflows/ci.yml"
     tags:
       - "v*.*.*"
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -28,25 +26,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v3
+        uses: xu-cheng/latex-action@v4
         with:
           root_file: main.tex
           latexmk_use_lualatex: false
           latexmk_shell_escape: false
 
-      - name: Verify PDF output
-        run: |
-          if [ ! -f main.pdf ]; then
-            echo "ERROR: main.pdf was not generated"
-            exit 1
-          fi
-          echo "SUCCESS: main.pdf generated ($(du -h main.pdf | cut -f1))"
-
       - name: Upload PDF as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: search-library-paper
           path: main.pdf
@@ -70,23 +60,22 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           cp main.pdf "search-library-paper-v${VERSION}.pdf"
-          echo "Renamed to: search-library-paper-v${VERSION}.pdf"
 
       - name: Create GitHub Release with PDF
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: "search-library-paper-*.pdf"
           generate_release_notes: true
           body: |
             ## Search Library Paper — ${{ github.ref_name }}
 
-            Artículo académico: **Algoritmo de Búsqueda A*: Implementación y Análisis Comparativo en Grafos y Matrices**
+            Articulo academico: Algoritmo de Busqueda A* - Implementacion y Analisis Comparativo en Grafos y Matrices
 
             ### Contenido
-            - Fundamentación teórica del algoritmo A*
-            - Análisis comparativo con BFS, DFS y Dijkstra
-            - Implementación en Python con arquitectura extensible
+            - Fundamentacion teorica del algoritmo A*
+            - Analisis comparativo con BFS, DFS y Dijkstra
+            - Implementacion en Python con arquitectura extensible
             - Resultados experimentales en grafos y grids
 
             ### Descargar
-            El PDF está adjunto como asset de este release.
+            El PDF esta adjunto como asset de este release.
