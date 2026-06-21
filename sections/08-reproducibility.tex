@@ -1,0 +1,147 @@
+% ============================================================================
+% Sección 8: Reproducibilidad
+% ============================================================================
+\section{Reproducibilidad}
+
+Esta sección documenta los pasos necesarios para reproducir completamente los experimentos presentados en este trabajo. Todo el código fuente es público y los resultados son deterministas.
+
+\subsection{Repositorios del proyecto}
+
+El ecosistema se compone de cuatro repositorios públicos:
+
+\begin{table}[H]
+\centering
+\caption{Repositorios del ecosistema}
+\label{tab:repos}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Componente} & \textbf{Repositorio} & \textbf{Rol} \\
+\midrule
+Core library & \texttt{ahincho/search-library} & Algoritmos de búsqueda \\
+Benchmark grafos & \texttt{ahincho/graph-search} & Experimentos en grafos \\
+Benchmark grids & \texttt{ahincho/path-search} & Experimentos en grids \\
+Artículo & \texttt{ahincho/search-paper} & Este documento \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Enlaces directos:
+\begin{itemize}
+    \item PyPI: \url{https://pypi.org/project/search-library/}
+    \item Core: \url{https://github.com/ahincho/search-library}
+    \item Grafos: \url{https://github.com/ahincho/graph-search}
+    \item Grids: \url{https://github.com/ahincho/path-search}
+    \item Paper: \url{https://github.com/ahincho/search-paper}
+\end{itemize}
+
+\subsection{Requisitos del entorno}
+
+\begin{itemize}
+    \item \textbf{Python:} $\geq$ 3.11 para \texttt{search-library}; $\geq$ 3.14 para los benchmarks.
+    \item \textbf{Gestor de paquetes:} \texttt{uv} (recomendado) o \texttt{pip} tradicional.
+    \item \textbf{Sistema operativo:} Multiplataforma (Windows, Linux, macOS).
+    \item \textbf{Sin dependencias externas:} La librería core no requiere paquetes de terceros.
+\end{itemize}
+
+\subsection{Instalación de la librería core}
+
+\subsubsection{Opción A: Desde PyPI (recomendado)}
+
+\begin{lstlisting}[language=bash, caption={Instalación desde PyPI}, label={lst:install_pypi}]
+# Con pip
+pip install search-library
+
+# Con uv
+uv add search-library
+\end{lstlisting}
+
+\subsubsection{Opción B: Desde código fuente}
+
+\begin{lstlisting}[language=bash, caption={Instalación desde fuente}, label={lst:install_source}]
+git clone https://github.com/ahincho/search-library
+cd search-library
+
+# Con pip
+pip install -e .
+
+# Con uv
+uv sync
+\end{lstlisting}
+
+\subsection{Reproducción del benchmark en grafos}
+
+\begin{lstlisting}[language=bash, caption={Ejecución del benchmark de grafos}, label={lst:run_graph}]
+git clone https://github.com/ahincho/graph-search
+cd graph-search
+
+# Opcion 1: Con uv (recomendado)
+uv sync
+uv run python src/main.py
+
+# Opcion 2: Con pip tradicional
+pip install search-library>=1.0.0
+python src/main.py
+\end{lstlisting}
+
+\textbf{Salida esperada:} Tabla comparativa de 5 algoritmos (A*, Dijkstra, BFS, DFS, Bidirectional) sobre la red vial Arequipa $\rightarrow$ Cusco con métricas de costo, nodos explorados y optimalidad.
+
+\subsection{Reproducción del benchmark en grids}
+
+\begin{lstlisting}[language=bash, caption={Ejecución del benchmark de grids}, label={lst:run_grid}]
+git clone https://github.com/ahincho/path-search
+cd path-search
+
+# Opcion 1: Con uv (recomendado)
+uv sync
+uv run grid-benchmark
+
+# Opcion 2: Con pip tradicional
+pip install search-library>=1.0.0
+python src/main.py
+\end{lstlisting}
+
+\textbf{Salida esperada:} Reporte completo de 8 escenarios con tablas de comparación, visualizaciones ASCII de grids, y análisis académico automático.
+
+\subsection{Ejecución de pruebas unitarias}
+
+\begin{lstlisting}[language=bash, caption={Ejecución de tests en la librería core}, label={lst:tests}]
+cd search-library
+
+# Con uv
+uv run pytest
+
+# Con pip
+pip install pytest pytest-cov
+pytest --cov=search_library --cov-fail-under=90
+\end{lstlisting}
+
+La cobertura mínima requerida es del 90\%. El reporte incluye cobertura por línea y por rama (\texttt{branch=true}).
+
+\subsection{Compilación del artículo}
+
+\begin{lstlisting}[language=bash, caption={Compilación local del PDF}, label={lst:compile}]
+git clone https://github.com/ahincho/search-paper
+cd search-paper
+
+# Windows (PowerShell)
+.\compile.ps1
+
+# Windows (CMD)
+compile.bat
+
+# Linux/macOS
+chmod +x scripts/build.sh
+./scripts/build.sh
+\end{lstlisting}
+
+El pipeline CI/CD en GitHub Actions compila automáticamente en cada push a \texttt{main} y genera releases versionados con el PDF adjunto al crear tags \texttt{v*.*.*}.
+
+\subsection{Garantías de reproducibilidad}
+
+\begin{itemize}
+    \item \textbf{Determinismo:} Todos los grids con obstáculos aleatorios se generan con semillas explícitas (\texttt{seed}). El mismo seed produce siempre el mismo grid.
+    \item \textbf{Sin estado externo:} Los benchmarks no dependen de archivos externos, bases de datos, ni servicios de red.
+    \item \textbf{Versión fija:} La dependencia \texttt{search-library>=1.0.0} está publicada en PyPI con versionado semántico. Los resultados de este artículo corresponden a la versión 1.0.0.
+    \item \textbf{CI/CD verificado:} El workflow de GitHub Actions compila el artículo y ejecuta los tests automáticamente, garantizando que el código en el repositorio siempre produce los resultados documentados.
+\end{itemize}
