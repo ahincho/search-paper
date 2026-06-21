@@ -42,6 +42,12 @@
 \tableofcontents
 \newpage
 
+% --- Abstract ---
+\begin{abstract}
+El presente trabajo documenta el dise\~no, implementaci\'on y validaci\'on experimental de \texttt{search-library}, un framework extensible de algoritmos de b\'usqueda publicado en PyPI. La librer\'ia implementa A*, BFS, DFS, Dijkstra y Bidirectional Search sobre una abstracci\'on gen\'erica parametrizada por tipo, sin dependencias externas. Se realiza un an\'alisis comparativo formal mediante dos capas experimentales: \texttt{graph-search}, que modela una red vial real del sur de Per\'u (10 ciudades), y \texttt{path-search}, que eval\'ua 8 escenarios en grids 2D con obst\'aculos y terrenos variables. Los resultados demuestran que A* con heur\'istica admisible encuentra siempre el camino \'optimo, reduciendo los nodos explorados entre 12\% y 97\% respecto a Dijkstra seg\'un el escenario. Se verifica experimentalmente la suboptimalidad de BFS en grafos ponderados (31\% mayor costo) y la dependencia de DFS del orden de exploraci\'on (hasta 6.71x el costo \'optimo). El ecosistema completo es reproducible, determinista y p\'ublicamente disponible.
+\end{abstract}
+\newpage
+
 % --- Repositorios del proyecto ---
 \begin{tcolorbox}[title=Repositorios y recursos del proyecto, breakable, colback=blue!2, colframe=blue!40!black]
 \renewcommand{\arraystretch}{1.4}
@@ -66,7 +72,7 @@
 
 % --- Bibliografia ---
 \newpage
-\bibliographystyle{plainnat}
+\bibliographystyle{apalike}
 \bibliography{references}
 
 \end{document}

@@ -10,7 +10,7 @@ Este trabajo presentó el diseño, implementación y validación experimental de
 \begin{enumerate}
     \item \textbf{Optimalidad garantizada:} A* encuentra consistentemente el camino de costo mínimo cuando se emplea una heurística admisible. En todos los experimentos realizados, el costo de la solución de A* coincidió con el de Dijkstra (que es provablemente óptimo), validando la correctitud de la implementación.
     
-    \item \textbf{Eficiencia superior:} La incorporación de información heurística reduce significativamente el espacio de búsqueda explorado. La reducción oscila entre 28\% en grafos pequeños (8 nodos) y 74\% en grids grandes ($50 \times 50$), demostrando que la ventaja de A* se amplifica con la escala del problema.
+    \item \textbf{Eficiencia superior:} La incorporación de información heurística reduce significativamente el espacio de búsqueda explorado. La reducción oscila entre 12\% en grids con movimiento cardinal y 97\% en grids grandes ($50 \times 50$), demostrando que la ventaja de A* se amplifica con la escala del problema. En el grafo de ciudades, A* explora un 50\% menos de nodos que Dijkstra.
     
     \item \textbf{Importancia de la heurística:} La elección de la función heurística impacta directamente en la eficiencia del algoritmo. La heurística Manhattan resultó un 18\% más eficiente que la Euclidiana en grids con movimiento cardinal, al proporcionar una estimación más ajustada al costo real.
     
