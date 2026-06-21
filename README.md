@@ -1,6 +1,6 @@
-# Search Article
+# Algoritmo de Búsqueda A*: Implementación y Análisis Comparativo en Grafos y Matrices
 
-Artículo académico sobre el **Algoritmo de Búsqueda A***: implementación, análisis de complejidad y comparación experimental con BFS, DFS, Dijkstra y Bidirectional Search, aplicados a grafos ponderados y grids bidimensionales.
+Artículo académico que presenta el diseño, implementación y validación experimental de un framework extensible de algoritmos de búsqueda (A*, BFS, DFS, Dijkstra, Bidirectional Search) aplicado a grafos ponderados y grids bidimensionales con obstáculos y terrenos variables.
 
 > Hincho, A. (2026). *Algoritmo de Búsqueda A*: Implementación y Análisis Comparativo en Grafos y Matrices*. Universidad Nacional de San Agustín de Arequipa.
 
@@ -194,4 +194,8 @@ ahincho@unsa.edu.pe | [@ahincho](https://github.com/ahincho)
 
 ## Licencia
 
-[MIT](LICENSE)
+Este proyecto está licenciado bajo los términos de la [Licencia MIT](https://opensource.org/licenses/MIT).
+
+Copyright (c) 2026 Angel Hincho.
+
+Se concede permiso para usar, copiar, modificar y distribuir este software sin restricciones, siempre que se incluya el aviso de copyright original. Ver el archivo [LICENSE](LICENSE) para más detalles.
