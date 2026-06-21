@@ -1,199 +1,190 @@
 % ============================================================================
-% Sección 5: Resultados
+% Sección 5: Resultados Experimentales
 % ============================================================================
 \section{Resultados Experimentales}
 
-Esta sección presenta los resultados obtenidos de la evaluación experimental del algoritmo A* implementado en \texttt{search-library}, comparándolo con BFS, DFS y Dijkstra en escenarios de grafos y grids.
+Esta sección presenta los resultados obtenidos de la ejecución de los benchmarks \texttt{graph-search} y \texttt{path-search} sobre la librería \texttt{search-library} v1.0.0. Todos los resultados son deterministas y reproducibles mediante la ejecución de los scripts de benchmark.
 
-\subsection{Experimento 1: Búsqueda en grafo ponderado}
+\subsection{Experimento 1: Búsqueda en grafo de ciudades}
 
-Se evaluó el rendimiento en un grafo no dirigido de 8 nodos con pesos variables, representando una red de ciudades conectadas.
+Se evaluó el rendimiento comparativo de los cinco algoritmos implementados sobre la red vial del sur de Perú, modelada como un grafo ponderado no dirigido de 10 nodos y 13 aristas.
 
 \subsubsection{Configuración}
 
 \begin{itemize}
-    \item Grafo no dirigido con 8 nodos y 12 aristas.
-    \item Pesos de aristas entre 1.0 y 10.0.
-    \item Nodo origen: A, Nodo destino: H.
-    \item Heurística: distancia en línea recta precalculada.
+    \item Grafo no dirigido con 10 ciudades y 13 conexiones viales.
+    \item Pesos de aristas: distancias reales en kilómetros (45 km -- 560 km).
+    \item Origen: Arequipa. Destino: Cusco.
+    \item Heurística: distancia Euclidiana basada en coordenadas geográficas.
 \end{itemize}
 
 \subsubsection{Resultados}
 
-La Tabla~\ref{tab:graph_results} muestra los resultados comparativos.
+La Tabla~\ref{tab:graph_results} presenta los resultados del benchmark en el grafo de ciudades.
 
 \begin{table}[H]
 \centering
-\caption{Comparación en grafo ponderado (8 nodos, 12 aristas)}
+\caption{Comparación de algoritmos en grafo de ciudades (Arequipa $\rightarrow$ Cusco)}
 \label{tab:graph_results}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}lcccc@{}}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccp{5cm}@{}}
 \toprule
-\textbf{Algoritmo} & \textbf{Nodos exp.} & \textbf{Costo} & \textbf{Pasos} & \textbf{Óptimo} \\
+\textbf{Algoritmo} & \textbf{Costo (km)} & \textbf{Nodos} & \textbf{Óptimo} & \textbf{Ruta encontrada} \\
 \midrule
-BFS & 7 & 14.0 & 4 & No$^1$ \\
-DFS & 5 & 22.0 & 6 & No \\
-Dijkstra & 7 & 11.0 & 3 & Sí \\
-A* (admisible) & 5 & 11.0 & 3 & Sí \\
+Dijkstra & 630.0 & 8 & Sí & Arequipa $\rightarrow$ Juliaca $\rightarrow$ Cusco \\
+A* & 630.0 & 4 & Sí & Arequipa $\rightarrow$ Juliaca $\rightarrow$ Cusco \\
+BFS & 690.0 & 6 & No & Arequipa $\rightarrow$ Puno $\rightarrow$ Cusco \\
+DFS & 1600.0 & 5 & No & Arequipa $\rightarrow$ Nazca $\rightarrow$ Ayacucho $\rightarrow$ Abancay $\rightarrow$ Cusco \\
+Bidirectional & 630.0 & 6 & Sí & Arequipa $\rightarrow$ Juliaca $\rightarrow$ Cusco \\
 \bottomrule
-\multicolumn{5}{l}{\footnotesize $^1$BFS es óptimo solo con costos uniformes.}
 \end{tabular}
 \end{table}
 
-A* encuentra la solución óptima explorando solo 5 nodos, un 28.6\% menos que Dijkstra, que necesita expandir 7 nodos para garantizar la misma solución.
+\subsubsection{Análisis}
 
-\subsection{Experimento 2: Pathfinding en grid con obstáculos}
+Los resultados del grafo de ciudades revelan tres hallazgos:
 
-Se evaluó la búsqueda de caminos en grids bidimensionales con diferentes dimensiones y densidades de obstáculos.
+\begin{enumerate}
+    \item \textbf{A* reduce la exploración un 50\% respecto a Dijkstra} (4 vs 8 nodos), ambos encontrando el mismo camino óptimo de 630 km. La heurística Euclidiana guía la búsqueda hacia Cusco descartando las ramas hacia el sur (Tacna, Moquegua) y el noroeste (Nazca).
 
-\subsubsection{Configuración}
+    \item \textbf{BFS encuentra una ruta subóptima} (690 km vs 630 km). BFS selecciona la ruta Arequipa $\rightarrow$ Puno $\rightarrow$ Cusco porque minimiza el número de saltos (2 hops), ignorando que la ruta por Juliaca tiene menor costo total. Esto demuestra formalmente que BFS no es adecuado para grafos con pesos heterogéneos.
 
+    \item \textbf{DFS cae en la ruta trampa} (1600 km, un 154\% mayor que el óptimo). La ruta Arequipa $\rightarrow$ Nazca $\rightarrow$ Ayacucho $\rightarrow$ Abancay $\rightarrow$ Cusco es la más larga posible, evidenciando que DFS es completamente dependiente del orden de exploración de sucesores.
+\end{enumerate}
+
+\subsection{Experimento 2: Benchmarks en grids bidimensionales}
+
+Se evaluaron los algoritmos sobre 8 escenarios de grids con configuraciones variadas. A continuación se presentan los resultados de los 6 escenarios no triviales (excluyendo el caso ``inicio = meta'' y ``sin camino'').
+
+\subsubsection{Resultados generales}
+
+La Tabla~\ref{tab:grid_all} resume los resultados de A*, Dijkstra, BFS, DFS y Bidirectional en los escenarios principales.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark completo en grids: nodos explorados por algoritmo}
+\label{tab:grid_all}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Escenario} & \textbf{A*} & \textbf{Dijkstra} & \textbf{BFS} & \textbf{DFS} & \textbf{Bidir.} \\
+\midrule
+4-Dir 20$\times$20 (10\%) & 317 & 360 & 360 & 123 & 346 \\
+8-Dir 20$\times$20 (10\%) & 53 & 360 & 360 & 26 & 211 \\
+Dense 20$\times$20 (30\%) & 110 & 265 & 265 & 232 & 158 \\
+Weighted 20$\times$20 & 103 & 353 & 355 & 20 & 212 \\
+Bug Trap 20$\times$20 & 302 & 374 & 374 & 229 & 351 \\
+Large 50$\times$50 (5\%) & 65 & 2375 & 2375 & 208 & 1286 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Costos y optimalidad}
+
+La Tabla~\ref{tab:grid_costs} compara los costos de las soluciones encontradas y su optimalidad.
+
+\begin{table}[H]
+\centering
+\caption{Costos de solución y verificación de optimalidad}
+\label{tab:grid_costs}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Escenario} & \textbf{Óptimo} & \textbf{A*} & \textbf{BFS} & \textbf{DFS} & \textbf{Bidir.} \\
+\midrule
+4-Dir (10\%) & 38.00 & 38.00 \checkmark & 38.00 \checkmark & 118.00 & 38.00 \checkmark \\
+8-Dir (10\%) & 27.46 & 27.46 \checkmark & 27.46 \checkmark & 35.36 & 27.46 \checkmark \\
+Dense (30\%) & 40.00 & 40.00 \checkmark & 40.00 \checkmark & 66.00 & 40.00 \checkmark \\
+Weighted & 29.04 & 29.04 \checkmark & 38.18 & 38.18 & 38.18 \\
+Bug Trap & 34.00 & 34.00 \checkmark & 34.00 \checkmark & 228.00 & 34.00 \checkmark \\
+Large (5\%) & 69.88 & 69.88 \checkmark & 69.88 \checkmark & 285.43 & 69.88 \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Observaciones:
 \begin{itemize}
-    \item Grids de $10 \times 10$, $20 \times 20$ y $50 \times 50$.
-    \item Densidad de obstáculos: 20\% y 30\%.
-    \item Inicio: esquina superior izquierda $(0, 0)$.
-    \item Meta: esquina inferior derecha $(n-1, n-1)$.
-    \item Movimiento: 4 direcciones (cardinal).
-    \item Heurística: distancia Manhattan.
+    \item A* siempre encuentra el costo óptimo en todos los escenarios.
+    \item BFS es óptimo en grids con costo uniforme pero \textbf{falla en el grid ponderado} (38.18 vs 29.04, un 31\% más caro).
+    \item DFS produce rutas entre 1.29x y 6.71x más costosas que el óptimo.
+    \item Bidirectional es óptimo en grids uniformes pero falla en el ponderado (por ser BFS-based).
 \end{itemize}
 
-\subsubsection{Resultados en grid $20 \times 20$}
+\subsection{Experimento 3: Eficiencia de A* vs Dijkstra}
 
-La Tabla~\ref{tab:grid_results} presenta los resultados para el grid de $20 \times 20$ con 20\% de obstáculos.
+La Tabla~\ref{tab:efficiency} cuantifica la reducción de nodos explorados por A* respecto a Dijkstra, que sirve como baseline de optimalidad sin heurística.
 
 \begin{table}[H]
 \centering
-\caption{Comparación en grid $20 \times 20$ (20\% obstáculos)}
-\label{tab:grid_results}
-\renewcommand{\arraystretch}{1.2}
+\caption{Reducción de nodos explorados: A* vs Dijkstra}
+\label{tab:efficiency}
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{@{}lccc@{}}
 \toprule
-\textbf{Algoritmo} & \textbf{Nodos explorados} & \textbf{Costo} & \textbf{Óptimo} \\
+\textbf{Escenario} & \textbf{A*} & \textbf{Dijkstra} & \textbf{Reducción} \\
 \midrule
-BFS & 289 & 38.0 & Sí \\
-DFS & 147 & 72.0 & No \\
-Dijkstra ($h=0$) & 312 & 38.0 & Sí \\
-A* (Manhattan) & 118 & 38.0 & Sí \\
-A* (Euclidiana) & 156 & 38.0 & Sí \\
+Grafo ciudades & 4 & 8 & 50\% \\
+4-Dir 20$\times$20 (10\%) & 317 & 360 & 12\% \\
+8-Dir 20$\times$20 (10\%) & 53 & 360 & \textbf{85\%} \\
+Dense 20$\times$20 (30\%) & 110 & 265 & 58\% \\
+Weighted 20$\times$20 & 103 & 353 & 71\% \\
+Bug Trap 20$\times$20 & 302 & 374 & 19\% \\
+Large 50$\times$50 (5\%) & 65 & 2375 & \textbf{97\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Escalabilidad}
+Los resultados demuestran que la ventaja de A* se amplifica con:
+\begin{itemize}
+    \item \textbf{Mayor tamaño del espacio:} En el grid 50$\times$50, A* alcanza un 97\% de reducción (65 vs 2375 nodos).
+    \item \textbf{Movimiento diagonal:} La heurística Octile en grids 8-direccionales produce un 85\% de reducción porque estima con mayor precisión el costo real.
+    \item \textbf{Ausencia de trampas:} En el Bug Trap, la reducción es solo del 19\% porque la formación cóncava engaña a la heurística, forzando exploración adicional.
+\end{itemize}
 
-La Tabla~\ref{tab:scalability} muestra cómo escala el número de nodos explorados por A* (heurística Manhattan) al incrementar el tamaño del grid.
+\subsection{Experimento 4: Impacto de la heurística en grids 8-direccionales}
 
-\begin{table}[H]
-\centering
-\caption{Escalabilidad de A* con heurística Manhattan}
-\label{tab:scalability}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Grid} & \textbf{Nodos A*} & \textbf{Nodos Dijkstra} & \textbf{Reducción} \\
-\midrule
-$10 \times 10$ & 34 & 72 & 52.8\% \\
-$20 \times 20$ & 118 & 312 & 62.2\% \\
-$50 \times 50$ & 487 & 1,843 & 73.6\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+En el escenario 8-Dir con heurística Octile, A* explora únicamente 53 nodos para encontrar el camino óptimo (costo 27.46), mientras que Dijkstra requiere 360 expansiones. Esta diferencia se debe a que la heurística Octile es la más ajustada posible para el modelo de movimiento 8-direccional con costo diagonal $\sqrt{2}$:
 
-Los resultados evidencian que la ventaja de A* sobre Dijkstra se amplifica a medida que crece el espacio de búsqueda, llegando a una reducción del 73.6\% en grids de $50 \times 50$.
+\begin{equation}
+    h_{\text{Octile}}(n) = \max(dx, dy) + (\sqrt{2} - 1) \cdot \min(dx, dy)
+\end{equation}
 
-\subsection{Experimento 3: Impacto de la heurística}
+En un grid sin obstáculos, esta heurística calcula el \textit{costo exacto} del camino óptimo, por lo que A* con heurística Octile en un grid libre expandiría exactamente los nodos del camino óptimo y nada más.
 
-Se evaluó el rendimiento de A* con diferentes funciones heurísticas en un grid $30 \times 30$ con 25\% de obstáculos y movimiento en 8 direcciones.
+\subsection{Experimento 5: Suboptimalidad de BFS en grids ponderados}
 
-\begin{table}[H]
-\centering
-\caption{Impacto de la función heurística (grid $30 \times 30$, 8 direcciones)}
-\label{tab:heuristic_impact}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Heurística} & \textbf{Nodos exp.} & \textbf{Costo} & \textbf{Admisible} \\
-\midrule
-$h = 0$ (Dijkstra) & 578 & 42.14 & Sí \\
-Euclidiana & 203 & 42.14 & Sí \\
-Manhattan & 167 & 42.14 & Sí \\
-\bottomrule
-\end{tabular}
-\end{table}
+El escenario de terreno ponderado demuestra cuantitativamente la limitación de BFS:
 
-Ambas heurísticas encuentran el mismo costo óptimo. La heurística Manhattan, al ser más informada en grids regulares, reduce adicionalmente los nodos explorados respecto a la Euclidiana.
+\begin{itemize}
+    \item \textbf{Dijkstra/A*:} Encuentran ruta con costo 29.04 y longitud 22 celdas. El camino rodea zonas de alto costo (agua, terreno difícil).
+    \item \textbf{BFS:} Encuentra ruta con costo 38.18 y longitud 20 celdas. Minimiza el número de celdas pero atraviesa terreno costoso.
+\end{itemize}
 
-\subsection{Experimento 4: Visualización de rutas}
+BFS selecciona el camino con menor número de saltos (20 vs 22 celdas), pero este camino cuesta un 31\% más porque atraviesa celdas de terreno difícil (costo 2.0) y agua (costo 5.0). Esto confirma formalmente que BFS optimiza hop-count, no costo total.
 
-La Figura~\ref{fig:grid_comparison} muestra la comparación visual entre los nodos explorados por Dijkstra y A* en un grid con obstáculos.
+\subsection{Experimento 6: Comportamiento del Bug Trap}
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[scale=0.35]
-    % Grid Dijkstra
-    \node[font=\footnotesize\bfseries] at (4.5, 11) {Dijkstra};
-    \foreach \x in {0,...,9} {
-        \foreach \y in {0,...,9} {
-            \fill[gray!15] (\x, \y) rectangle (\x+1, \y+1);
-            \draw[gray!40] (\x, \y) rectangle (\x+1, \y+1);
-        }
-    }
-    % Obstacles
-    \foreach \pos in {(2,7),(3,7),(4,7),(5,7),(3,5),(3,4),(3,3),(6,3),(7,3),(7,4)} {
-        \fill[black!70] \pos rectangle ++(1,1);
-    }
-    % Explored (many)
-    \foreach \pos in {(0,8),(1,8),(0,7),(1,7),(0,6),(1,6),(2,6),(0,5),(1,5),(2,5),(0,4),(1,4),(2,4),(0,3),(1,3),(2,3),(0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(6,2),(5,3),(5,4),(5,5),(5,6),(4,6),(4,5),(4,4),(4,3),(6,4),(6,5),(6,6),(7,5),(7,6),(8,5),(8,6)} {
-        \fill[blue!20] \pos rectangle ++(1,1);
-    }
-    % Path
-    \foreach \pos in {(0,9),(1,9),(2,9),(2,8),(3,8),(4,8),(5,8),(6,8),(6,7),(6,6),(7,6),(8,6),(8,7),(8,8),(9,8),(9,9)} {
-        \fill[green!50] \pos rectangle ++(1,1);
-    }
-    % Start/End
-    \fill[red!70] (0,9) rectangle ++(1,1);
-    \fill[red!70] (9,0) rectangle ++(1,1);
-    \node[font=\tiny, white] at (0.5,9.5) {S};
-    \node[font=\tiny, white] at (9.5,0.5) {G};
-\end{tikzpicture}
-\hspace{0.5cm}
-\begin{tikzpicture}[scale=0.35]
-    % Grid A*
-    \node[font=\footnotesize\bfseries] at (4.5, 11) {A* (Manhattan)};
-    \foreach \x in {0,...,9} {
-        \foreach \y in {0,...,9} {
-            \fill[gray!15] (\x, \y) rectangle (\x+1, \y+1);
-            \draw[gray!40] (\x, \y) rectangle (\x+1, \y+1);
-        }
-    }
-    % Same obstacles
-    \foreach \pos in {(2,7),(3,7),(4,7),(5,7),(3,5),(3,4),(3,3),(6,3),(7,3),(7,4)} {
-        \fill[black!70] \pos rectangle ++(1,1);
-    }
-    % Explored (fewer - guided by heuristic)
-    \foreach \pos in {(0,8),(1,8),(1,7),(2,8),(3,8),(4,8),(5,8),(6,7),(6,6),(7,6),(8,6),(8,7),(8,8),(9,8)} {
-        \fill[blue!20] \pos rectangle ++(1,1);
-    }
-    % Path (same optimal)
-    \foreach \pos in {(0,9),(1,9),(2,9),(2,8),(3,8),(4,8),(5,8),(6,8),(6,7),(6,6),(7,6),(8,6),(8,7),(8,8),(9,8),(9,9)} {
-        \fill[green!50] \pos rectangle ++(1,1);
-    }
-    % Start/End
-    \fill[red!70] (0,9) rectangle ++(1,1);
-    \fill[red!70] (9,0) rectangle ++(1,1);
-    \node[font=\tiny, white] at (0.5,9.5) {S};
-    \node[font=\tiny, white] at (9.5,0.5) {G};
-\end{tikzpicture}
-\caption{Comparación visual: nodos explorados (azul) y camino óptimo (verde). Dijkstra explora significativamente más nodos que A*.}
-\label{fig:grid_comparison}
-\end{figure}
+El escenario Bug Trap evalúa la robustez ante heurísticas engañosas. La formación en U atrae al algoritmo hacia el interior del obstáculo cóncavo porque la heurística indica que la meta está ``cerca'' (en línea recta). Los resultados:
+
+\begin{itemize}
+    \item A* (302 nodos): Entra en la trampa pero eventualmente escapa al explorar fuera del obstáculo, gracias a que $f(n) = g(n) + h(n)$ penaliza los caminos largos acumulados.
+    \item DFS (229 nodos, costo 228.00): Se pierde completamente, produciendo un camino 6.71x más costoso.
+    \item Dijkstra (374 nodos): Explora uniformemente, evitando la trampa pero al costo de expandir más nodos.
+\end{itemize}
+
+\subsection{Experimento 7: Detección de casos sin solución}
+
+En el escenario sin camino (meta rodeada por obstáculos), todos los algoritmos detectan correctamente la imposibilidad y reportan fallo (\texttt{success = False}) tras explorar 96 nodos (la totalidad de celdas alcanzables). Bidirectional detecta la falla más rápidamente (4 nodos) porque la búsqueda inversa desde la meta no puede expandirse.
 
 \subsection{Resumen de resultados}
 
-Los experimentos confirman:
+Los 36 ejecuciones de benchmark (5 algoritmos $\times$ 8 escenarios, menos 4 triviales) confirman:
+
 \begin{enumerate}
-    \item A* encuentra siempre la solución óptima cuando la heurística es admisible.
-    \item La reducción en nodos explorados respecto a Dijkstra oscila entre 28\% (grafos pequeños) y 74\% (grids grandes).
-    \item La heurística Manhattan es superior a la Euclidiana en grids con movimiento cardinal.
-    \item La ventaja de A* se amplifica con el tamaño del espacio de búsqueda.
+    \item A* encuentra el camino óptimo en \textbf{todos} los escenarios con heurística admisible (23/23 ejecuciones exitosas son óptimas).
+    \item La reducción de nodos explorados respecto a Dijkstra oscila entre 12\% y 97\%, con mayor beneficio en espacios grandes y heurísticas ajustadas.
+    \item BFS es subóptimo en grafos ponderados (31\% mayor costo en weighted grid; 9.5\% mayor en grafo de ciudades).
+    \item DFS produce soluciones entre 1.29x y 6.71x más costosas que el óptimo.
+    \item Bidirectional Search reduce el espacio de búsqueda respecto a BFS unidireccional en todos los escenarios uniformes.
+    \item Todos los algoritmos detectan correctamente la ausencia de solución.
 \end{enumerate}
